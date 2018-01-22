@@ -13,6 +13,7 @@ genValue=${10}
 tag=${11}
 refName=${12}
 objName=${13}
+axisCollectionName=${14}
 
 ##Create Work Area
 cd $TMPDIR || exit
@@ -36,8 +37,8 @@ cd analysis || exit
 
 #cd RecoNtuples/HGCalAnalysis/test/HGCalAnalysis
 pwd
-echo python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName
-python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName
+echo python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName
+python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName
 ls -l
 
 outfilename="${gunType}_${pid}_${genValue}GeV_${refName}_${objName}_${tag}.root"

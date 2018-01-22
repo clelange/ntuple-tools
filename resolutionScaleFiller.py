@@ -1,6 +1,6 @@
 # investigate shower development based on RecHits and SimClusters
 import ROOT
-import os
+# import os
 import optparse
 # from array import array
 # from HGCalImagingAlgo import recHitAboveThreshold
@@ -80,7 +80,7 @@ class ResolutionScaleObject:
         return (self.dPt() / self.refTLV.Pt())
 
 
-def eventLoop(ntuple, refName, objName, gun_type, pidOfInterest, GEN_engpt, histDict):
+def eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidOfInterest, GEN_engpt, histDict):
     """
     Loop over ntuple,
     for the collection of interest, match with genPart to select relevant objects,
@@ -110,8 +110,10 @@ def eventLoop(ntuple, refName, objName, gun_type, pidOfInterest, GEN_engpt, hist
         referenceCollection = event.getDataFrame(prefix=refName)
         collectionOfInterest = None
         if (objName == "megacluster"):
-            genParticles, multiClusters, layerClusters, recHits = megaClustering.getCollections(event)
-            collectionOfInterest = megaClustering.getMegaClusters(genParticles, multiClusters, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest)
+            genParticles, axisCollection, layerClusters, recHits = megaClustering.getCollections(event, axisCollectionName)
+            collectionOfInterest = megaClustering.getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest)
+            # genParticles, multiClusters, layerClusters, recHits = megaClustering.getCollections(event)
+            # collectionOfInterest = megaClustering.getMegaClusters(genParticles, multiClusters, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest)
         elif (objName == "pfcluster_uncalib"):
             # use normal pfcluster collection, but in the following energy instead of correctedEnergy will be used
             collectionOfInterest = event.getDataFrame(prefix="pfcluster")
@@ -264,6 +266,7 @@ def main():
     parser.add_option('', '--tag', dest='tag', type='string',  default='noPU', help='some tag, best used for PU and other info')
     parser.add_option('', '--ref', dest='refName', type='string',  default='genpart', help='reference collection')
     parser.add_option('', '--obj', dest='objName', type='string',  default='pfcluster', help='object of interest collection')
+    parser.add_option('', '--axis', dest='axisCollectionName', type='string',  default='multiclus', help='object for megaclustering axis collection')
 
     # store options and arguments as global variables
     global opt, args
@@ -275,6 +278,7 @@ def main():
     print "GEN_engpt:", opt.genValue
     print "refName:", opt.refName
     print "objName:", opt.objName
+    print "axisCollectionName:", opt.axisCollectionName
 
     # set sample/tree - for photons
     gun_type = opt.gunType
@@ -283,6 +287,9 @@ def main():
     tag = opt.tag
     refName = opt.refName
     objName = opt.objName
+    axisCollectionName = opt.axisCollectionName
+    if objName == "megacluster":
+        tag = axisCollectionName + "_" + tag
 
     histDict = {}
     fileList = opt.fileString.split(",")
@@ -291,7 +298,7 @@ def main():
 
     for fileName in fileList:
         ntuple = HGCalNtuple(opt.fileString)
-        eventLoop(ntuple, refName, objName, gun_type, pidSelected, GEN_engpt, histDict)
+        eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidSelected, GEN_engpt, histDict)
 
     f = ROOT.TFile("{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, GEN_engpt, refName, objName, tag), "recreate")
     for etaBinName in etaBins:

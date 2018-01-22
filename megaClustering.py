@@ -98,6 +98,9 @@ def getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClust
         matchedObject = None
         if useTracks:
             matchedObject = axisCollection.iloc[[bestTruthMatchedIndices[idx]]]
+            # track is not extrapolated when pt <= 3 GeV
+            if matchedObject.pt.item() <= 3:
+                continue
         else:
             matchedObject = axisCollection.iloc[[bestTruthMatchedIndices[idx]]]
         megaCluster = getSingleMegaCluster(matchedObject, layerClusters, recHits, useTracks, energyRadius, frontRadius, backRadius, doPileupSubtraction)
@@ -120,7 +123,6 @@ def getSingleMegaCluster(matchedObject, layerClusters, recHits, useTracks, energ
         selectedLayerClusters = layerClusters[(layerClusters.layer == layer) & (layerClusters.eta*etaSide > 0)]
         if selectedLayerClusters.shape[0] == 0:
             # continue if no layer clusters selected
-            print "layer", layer, "no layer clusters selected"
             continue
         layer_z = 0
         posDF = None
