@@ -41,6 +41,10 @@ echo python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid 
 python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName
 ls -l
 
+if [ "$objName" == "megacluster" ]; then
+  tag=${axisCollectionName}_${tag}
+fi
+
 outfilename="${gunType}_${pid}_${genValue}GeV_${refName}_${objName}_${tag}.root"
 
 # copy to outDir
