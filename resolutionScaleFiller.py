@@ -80,7 +80,7 @@ class ResolutionScaleObject:
         return (self.dPt() / self.refTLV.Pt())
 
 
-def eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidOfInterest, GEN_engpt, histDict):
+def eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidOfInterest, GEN_engpt, histDict, skipLayers):
     """
     Loop over ntuple,
     for the collection of interest, match with genPart to select relevant objects,
@@ -111,7 +111,7 @@ def eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidOfInter
         collectionOfInterest = None
         if (objName == "megacluster"):
             genParticles, axisCollection, layerClusters, recHits = megaClustering.getCollections(event, axisCollectionName)
-            collectionOfInterest = megaClustering.getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest)
+            collectionOfInterest = megaClustering.getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest, skipLayers=skipLayers)
             # genParticles, multiClusters, layerClusters, recHits = megaClustering.getCollections(event)
             # collectionOfInterest = megaClustering.getMegaClusters(genParticles, multiClusters, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest)
         elif (objName == "pfcluster_uncalib"):
@@ -267,6 +267,7 @@ def main():
     parser.add_option('', '--ref', dest='refName', type='string',  default='genpart', help='reference collection')
     parser.add_option('', '--obj', dest='objName', type='string',  default='pfcluster', help='object of interest collection')
     parser.add_option('', '--axis', dest='axisCollectionName', type='string',  default='multiclus', help='object for megaclustering axis collection')
+    parser.add_option('-s', '--skipLayers', dest='skipLayers', type='string',  default='', help='comma-separated list of layers to skip')
 
     # store options and arguments as global variables
     global opt, args
@@ -279,6 +280,7 @@ def main():
     print "refName:", opt.refName
     print "objName:", opt.objName
     print "axisCollectionName:", opt.axisCollectionName
+    print "skipLayers:", opt.skipLayers
 
     # set sample/tree - for photons
     gun_type = opt.gunType
@@ -293,12 +295,15 @@ def main():
 
     histDict = {}
     fileList = opt.fileString.split(",")
+    skipLayers = []
+    if opt.skipLayers:
+        skipLayers = [int(i) for i in opt.skipLayers.split(",")]
 
     start_time = timeit.default_timer()
 
     for fileName in fileList:
         ntuple = HGCalNtuple(opt.fileString)
-        eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidSelected, GEN_engpt, histDict)
+        eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidSelected, GEN_engpt, histDict, skipLayers)
 
     f = ROOT.TFile("{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, GEN_engpt, refName, objName, tag), "recreate")
     for etaBinName in etaBins:

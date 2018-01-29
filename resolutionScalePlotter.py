@@ -239,8 +239,8 @@ def setupResScaleScenario(inputdir, gun_type, pidSelected, GEN_engpt, refName, s
         fileMega_noPU = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "megacluster", "noPU"), "read")  # info based on megacluster energy
         fileRenormNoPU = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "megacluster", "noPU"), "read")  # info based on megacluster energy, noPU
         # map of histograms and files
-        histsFilesAndInfoMap = {"obj_Pt": {'file': fileMega_PU200, 'hist_prefix': "obj_Pt", 'leg': "Megacluster, pile-up 200", 'color': 10000},
-                                "cmp_Pt": {'file': fileMega_noPU,  'hist_prefix': "obj_Pt", 'leg': "Megacluster, no pile-up", 'color': 10003}}
+        histsFilesAndInfoMap = {"obj_Pt": {'file': fileMega_PU200, 'hist_prefix': "obj_EoverERef", 'leg': "Megacluster, pile-up 200", 'color': 10000},
+                                "cmp_Pt": {'file': fileMega_noPU,  'hist_prefix': "obj_EoverERef", 'leg': "Megacluster, no pile-up", 'color': 10003}}
         resolutionFileAndInfoMap = {'file': fileMega_PU200, 'hist_prefix': "obj_dEoverE", 'leg': "Megacluster, pile-up 200", 'color': 10000,
                                     'renormNoPU': {'file': fileRenormNoPU,  'hist_prefix': "obj_Pt"}}
     elif (scenario == "Mega_track_noPU_PU200"):  # scenario: noPU and PU200, resolutoin from Mega cluster, comparison "Mega vs. PF corrected
@@ -249,8 +249,8 @@ def setupResScaleScenario(inputdir, gun_type, pidSelected, GEN_engpt, refName, s
         fileMega_noPU = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "megacluster", "track_noPU"), "read")  # info based on megacluster energy
         fileRenormNoPU = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "megacluster", "track_noPU"), "read")  # info based on megacluster energy, noPU
         # map of histograms and files
-        histsFilesAndInfoMap = {"obj_Pt": {'file': fileMega_PU200, 'hist_prefix': "obj_Pt", 'leg': "Megacluster, pile-up 200", 'color': 10000},
-                                "cmp_Pt": {'file': fileMega_noPU,  'hist_prefix': "obj_Pt", 'leg': "Megacluster, no pile-up", 'color': 10003}}
+        histsFilesAndInfoMap = {"obj_Pt": {'file': fileMega_PU200, 'hist_prefix': "obj_EoverERef", 'leg': "Megacluster (track), pile-up 200", 'color': 10000},
+                                "cmp_Pt": {'file': fileMega_noPU,  'hist_prefix': "obj_EoverERef", 'leg': "Megacluster (track), no pile-up", 'color': 10003}}
         resolutionFileAndInfoMap = {'file': fileMega_PU200, 'hist_prefix': "obj_dEoverE", 'leg': "Megacluster, pile-up 200", 'color': 10000,
                                     'renormNoPU': {'file': fileRenormNoPU,  'hist_prefix': "obj_Pt"}}
     elif (scenario == "Mega_noPU_PU200_PU200nosub"):  # scenario: noPU and PU200, resolutoin from Mega cluster, comparison "noPU vs. PU200 with substraction vs. PU200 without substraction

@@ -14,6 +14,9 @@ tag=${11}
 refName=${12}
 objName=${13}
 axisCollectionName=${14}
+if [ $# -ge 15 ]; then
+  skipLayers=${15}
+fi
 
 ##Create Work Area
 cd $TMPDIR || exit
@@ -37,8 +40,13 @@ cd analysis || exit
 
 #cd RecoNtuples/HGCalAnalysis/test/HGCalAnalysis
 pwd
-echo python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName
-python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName
+if [ -z ${skipLayers+x} ]; then
+  echo python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName
+  python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName
+else
+  echo python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName --skipLayers $skipLayers
+  python resolutionScaleFiller.py --files $fileList --gunType $gunType --pid $pid --genValue $genValue --tag $tag --ref $refName --obj $objName --axis $axisCollectionName --skipLayers $skipLayers
+fi
 ls -l
 
 if [ "$objName" == "megacluster" ]; then

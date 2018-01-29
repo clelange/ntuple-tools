@@ -12,6 +12,7 @@ import hgcalHelpers
 import numpy as np
 import pandas as pd
 from itertools import repeat
+from RecHitCalibration import RecHitCalibration as rhc
 maxlayer = 52
 energyWeights = list(repeat(1.02, 28)) + list(repeat(0.86, 12)) + list(repeat(1.12, 12))
 
@@ -24,7 +25,7 @@ def getConeRadius(frontRadius, backRadius, z, maxval=9999.):
     return val
 
 
-def pileupSubtraction(matchedObject, selectedLayerClusters, recHits, layer, energyRadius, frontRadius, backRadius):
+def pileupSubtraction(matchedObject, selectedLayerClusters, recHits, layer, energyRadius, frontRadius, backRadius, layerEnergyCorrection):
     """For now, the code is the same as in getMegaClusters, but the phi coordinate is changed by pi."""
 
     pTSum = 0
@@ -50,13 +51,17 @@ def pileupSubtraction(matchedObject, selectedLayerClusters, recHits, layer, ener
         # sum up energies and pT
         selectedRecHits = associatedRecHits.iloc[matchedRecHitIndices]
         # correct energy by subdetector weights
-        energySum += selectedRecHits[["energy"]].sum()[0]*energyWeights[layer-1]*1.38
-        pTSum += selectedRecHits[["pt"]].sum()[0]*energyWeights[layer-1]*1.38
+        energySum += selectedRecHits[["energy"]].sum()[0]
+        pTSum += selectedRecHits[["pt"]].sum()[0]
+
+    # perform energy correction
+    energySum *= energyWeights[layer-1]*1.38*layerEnergyCorrection
+    pTSum *= energyWeights[layer-1]*1.38*layerEnergyCorrection
 
     return (energySum, pTSum)
 
 
-def getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidSelected, energyRadius=6, frontRadius=3, backRadius=8, doPileupSubtraction=True):
+def getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidSelected, energyRadius=6, frontRadius=3, backRadius=8, doPileupSubtraction=True, skipLayers=[]):
     """
     get the actual mega clusters.
     frontRadius: cone at front of EE
@@ -103,7 +108,7 @@ def getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClust
                 continue
         else:
             matchedObject = axisCollection.iloc[[bestTruthMatchedIndices[idx]]]
-        megaCluster = getSingleMegaCluster(matchedObject, layerClusters, recHits, useTracks, energyRadius, frontRadius, backRadius, doPileupSubtraction)
+        megaCluster = getSingleMegaCluster(matchedObject, layerClusters, recHits, useTracks, energyRadius, frontRadius, backRadius, doPileupSubtraction, skipLayers)
         megaClusters.append(megaCluster)
 
     megaClustersDF = pd.DataFrame(megaClusters, columns=['pt', 'eta', 'phi', 'energy'])
@@ -111,13 +116,27 @@ def getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClust
     return megaClustersDF
 
 
-def getSingleMegaCluster(matchedObject, layerClusters, recHits, useTracks, energyRadius, frontRadius, backRadius, doPileupSubtraction):
+def getSingleMegaCluster(matchedObject, layerClusters, recHits, useTracks, energyRadius, frontRadius, backRadius, doPileupSubtraction, skipLayers):
 
     energySum = 0
     pTSum = 0
+    skippedPreviousLayer = False
+    layerEnergyCorrection = 1.
+    if skipLayers:
+        dEdX_weights = rhc().dEdX_weights
     # now find layer clusters within the multicluster/track cone
     # maybe it's good to do this per layer to save some computing time
     for layer in range(1, maxlayer+1):
+        if skippedPreviousLayer:
+            if layer > 1:
+                layerEnergyCorrection = (dEdX_weights[layer-1] + dEdX_weights[layer]) / dEdX_weights[layer]
+            skippedPreviousLayer = False
+        else:
+            layerEnergyCorrection = 1.
+        if layer in skipLayers:
+            skippedPreviousLayer = True
+            continue
+        # print "layer", layer, "layerEnergyCorrection", layerEnergyCorrection
         # match only in same detector side
         etaSide = float(matchedObject.eta)  # not sure why this needs to be cast
         selectedLayerClusters = layerClusters[(layerClusters.layer == layer) & (layerClusters.eta*etaSide > 0)]
@@ -150,10 +169,10 @@ def getSingleMegaCluster(matchedObject, layerClusters, recHits, useTracks, energ
             # sum up energies and pT
             selectedRecHits = associatedRecHits.iloc[matchedRecHitIndices]
             # correct energy by subdetector weights
-            energySum += selectedRecHits[["energy"]].sum()[0]*energyWeights[layer-1]*1.38
-            pTSum += selectedRecHits[["pt"]].sum()[0]*energyWeights[layer-1]*1.38
+            energySum += selectedRecHits[["energy"]].sum()[0]*energyWeights[layer-1]*1.38*layerEnergyCorrection
+            pTSum += selectedRecHits[["pt"]].sum()[0]*energyWeights[layer-1]*1.38*layerEnergyCorrection
         if (doPileupSubtraction):
-            (pu_energySum, pu_pTSum) = pileupSubtraction(matchedObject, selectedLayerClusters, recHits, layer, energyRadius, frontRadius, backRadius)
+            (pu_energySum, pu_pTSum) = pileupSubtraction(matchedObject, selectedLayerClusters, recHits, layer, energyRadius, frontRadius, backRadius, layerEnergyCorrection)
             energySum -= pu_energySum
             pTSum -= pu_pTSum
 
@@ -187,6 +206,7 @@ def main():
     parser.add_option('-p', '--pid', dest='pid', type='int',  default=211, help='pdgId int')
     parser.add_option('-g', '--genValue', dest='genValue', type='float',  default=50, help='generated pT or energy')
     parser.add_option('-a', '--axisCollectionName', dest='axisCollectionName', type='string',  default='multiclus', help='object to use as clustering axis (multiclus/track)')
+    parser.add_option('-s', '--skipLayers', dest='skipLayers', type='string',  default='', help='comma-separated list of layers to skip')
 
     # store options and arguments as global variables
     global opt, args
@@ -197,6 +217,7 @@ def main():
     print "pid:", opt.pid
     print "GEN_engpt:", opt.genValue
     print "axisCollectionName:", opt.axisCollectionName
+    print "skipLayers:", opt.skipLayers
 
     # set sample/tree - for photons
     gun_type = opt.gunType
@@ -205,6 +226,9 @@ def main():
     axisCollectionName = opt.axisCollectionName
 
     fileList = opt.fileString.split(",")
+    skipLayers = []
+    if opt.skipLayers:
+        skipLayers = [int(i) for i in opt.skipLayers.split(",")]
 
     for fileName in fileList:
         ntuple = HGCalNtuple(opt.fileString)
@@ -215,7 +239,7 @@ def main():
             # get collections
 
             genParticles, axisCollection, layerClusters, recHits = getCollections(event, axisCollectionName)
-            megaClusters = getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidSelected)
+            megaClusters = getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidSelected, skipLayers=skipLayers)
             print megaClusters
 
 

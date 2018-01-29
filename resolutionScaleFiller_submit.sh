@@ -2,12 +2,13 @@
 
 SAMPLEFILE=$1
 
-OUTDIR="/eos/user/c/clange/HGCal/ScaleResolution/_new/"
+OUTDIR="/eos/user/c/clange/HGCal/ScaleResolution/skip_24_11_11/"
 PREFIX="root://eoscms.cern.ch//eos/cms/store/cmst3/group/hgcal/CMG_studies/Production/"
 GUNTYPE="pt"
 POSTFIX="NTUP"
 REFNAME="genpart"
-OBJNAMES="pfcluster megacluster"
+# OBJNAMES="pfcluster megacluster"
+OBJNAMES="megacluster"
 QUEUE="8nh"
 
 for SAMPLE in `cat $SAMPLEFILE`; do
@@ -22,7 +23,9 @@ for SAMPLE in `cat $SAMPLEFILE`; do
     PID=22
   fi;
   for OBJNAME in $OBJNAMES; do
-    echo python resolutionScaleFiller_batchWrapper.py --inputdir ${SAMPLEDIR} --outdir ${OUTDIR} --gunType $GUNTYPE --pid $PID --genValue $PTVAL --tag $TAG --ref $REFNAME --obj $OBJNAME --queue $QUEUE
-    python resolutionScaleFiller_batchWrapper.py --inputdir ${SAMPLEDIR} --outdir ${OUTDIR} --gunType $GUNTYPE --pid $PID --genValue $PTVAL --tag $TAG --ref $REFNAME --obj $OBJNAME --queue $QUEUE
+    echo python resolutionScaleFiller_batchWrapper.py --inputdir ${SAMPLEDIR} --outdir ${OUTDIR} --gunType $GUNTYPE --pid $PID --genValue $PTVAL --tag $TAG --ref $REFNAME --obj $OBJNAME --queue $QUEUE --skipLayers 3,10,17,24,34,46
+    # --skipLayers 2,4,7,10,13,16,19,22,25,27,30,34,38,42,46,50
+    python resolutionScaleFiller_batchWrapper.py --inputdir ${SAMPLEDIR} --outdir ${OUTDIR} --gunType $GUNTYPE --pid $PID --genValue $PTVAL --tag $TAG --ref $REFNAME --obj $OBJNAME --queue $QUEUE --skipLayers 3,10,17,24,34,46
+    # --skipLayers 2,4,7,10,13,16,19,22,25,27,30,34,38,42,46,50
   done
 done

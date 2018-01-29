@@ -40,7 +40,8 @@ def main():
     parser.add_option('', '--tag', dest='tag', type='string',  default='noPU', help='some tag, best used for PU and other info')
     parser.add_option('', '--ref', dest='refName', type='string',  default='genpart', help='reference collection')
     parser.add_option('', '--obj', dest='objName', type='string',  default='pfcluster', help='object of interest collection')
-    parser.add_option('', '--axis', dest='axisCollectionName', type='string',  default='multiclus', help='object for megaclustering axis collection')
+    parser.add_option('', '--axis', dest='axisCollectionName', type='string', default='multiclus', help='object for megaclustering axis collection')
+    parser.add_option('-s', '--skipLayers', dest='skipLayers', type='string', default='', help='comma-separated list of layers to skip')
     parser.add_option('', '--queue', dest='queue', type='string',  default='8nh', help='queue to run on')
 
     # store options and arguments as global variables
@@ -65,6 +66,7 @@ def main():
     print "ref:", opt.refName
     print "obj:", opt.objName
     print "axisCollectionName:", opt.axisCollectionName
+    print "skipLayers:", opt.skipLayers
     eosdir = opt.inputdir[21:]
     onlyfiles = [f for f in os.listdir(eosdir) if os.path.isfile(os.path.join(eosdir, f))]
     # nEvents = -1
@@ -96,7 +98,7 @@ def main():
         print filename
         jobName = str(fileIndex)+'_'+str(time.time())
         tag = "{}_{}".format(opt.tag, fileIndex)
-        cmd = 'bsub -o {stdOut} -e {stdErr} -q {queue} -J {jobName} {batchScript} {p1} {p2} {p3} {p4} \"{p5}\" {p6} {p7} {p8} {p9} {p10} {p11} {p12} {p13} {p14}'.format(stdOut=stdOut, stdErr=stdErr, queue=queue, jobName=jobName, batchScript=batchScript, p1=currentDir, p2=CMSSW_BASE, p3=CMSSW_VERSION, p4=SCRAM_ARCH, p5=filename, p6=outDir, p7=sampleName, p8=opt.gunType, p9=opt.pid, p10=opt.genValue, p11=tag, p12=opt.refName, p13=opt.objName, p14=opt.axisCollectionName)
+        cmd = 'bsub -o {stdOut} -e {stdErr} -q {queue} -J {jobName} {batchScript} {p1} {p2} {p3} {p4} \"{p5}\" {p6} {p7} {p8} {p9} {p10} {p11} {p12} {p13} {p14} {p15}'.format(stdOut=stdOut, stdErr=stdErr, queue=queue, jobName=jobName, batchScript=batchScript, p1=currentDir, p2=CMSSW_BASE, p3=CMSSW_VERSION, p4=SCRAM_ARCH, p5=filename, p6=outDir, p7=sampleName, p8=opt.gunType, p9=opt.pid, p10=opt.genValue, p11=tag, p12=opt.refName, p13=opt.objName, p14=opt.axisCollectionName, p15=opt.skipLayers)
         print cmd
         processCmd(cmd)
         time.sleep(1)
