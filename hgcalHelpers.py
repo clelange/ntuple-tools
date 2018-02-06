@@ -52,7 +52,16 @@ def getRecHitsSimAssoc(rechits_raw, simcluster, dependSensor=True, ecut=3, verbo
         rHitsSimAssoc[simClusIndex] = rHitsSimAssocTemp
     return rHitsSimAssoc
 
-# get list of rechist associated to sim-cluster which is within dR<0.2 of the genParticle
+
+def getRecHitsAssociatedToSimCluster(simCluster, recHits):
+    # get sim-cluster associations
+    recHitIndices = np.nonzero(np.in1d(recHits["detid"], simCluster["hits"]))
+    # print recHitIndices
+    # for index in recHitIndices:
+    #     for i in index:
+    #         print recHits.iloc[i]
+    # print recHitIndices
+    return recHitIndices
 
 
 def deltaRSquared(obj1, obj2):
