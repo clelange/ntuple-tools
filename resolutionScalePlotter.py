@@ -153,7 +153,7 @@ def setupSummaryGraphs(pidSelected, resScale_values, scenarios, type='effSigma',
     return (graphsAndProps, grOptions)
 
 
-# setup scenario for resolution and scale extraction and comparions
+# setup scenario for resolution and scale extraction and comparisons
 def setupResScaleScenario(inputdir, gun_type, pidSelected, GEN_engpt, refName, scenario="PF_noPU"):
     if (scenario == "PF_PU200"):  # scenario: PU, resolutoin from PF, comparison "PF vs. PF corrected.
         # list of files and corresponding info
@@ -364,6 +364,26 @@ def main():
                         (gr, stohasticTerm, constantTerm, noiseTerm) = hgcalHistHelpers.fitResolution(gr, graphsAndProps[gr]['color'], graphsAndProps[gr]['LineStyle'])
                         # graphsAndProps[gr]['latexComment'] = "#frac{#sigma(p_{T})}{p_{T}} = #frac{" +"{0:.1f}".format(stohasticTerm) + "%}{#sqrt{p_{T}}} #oplus " + "{0:.1f}".format(constantTerm) + "%"
                 hgcalHistHelpers.drawGraphs(graphsAndProps, grOptions, outDir, tag=type+"_vs_"+vsDep+"_"+ pidmap[pidSelected] + "_scenarios_" + "_".join(scenarios) + "_" + tag)
+                if type == 'effSigma' and vsDep == 'pt':
+                    resDict = {}
+                    # print "HERE:", graphsAndProps
+                    for graph, props in graphsAndProps.iteritems():
+                        print props['leg']
+                        resDict[props['leg']] = []
+                        for point in range(1, graph.GetN()):
+                            x = ROOT.Double()
+                            y = ROOT.Double()
+                            graph.GetPoint(point, x, y)
+                            # print point, x, y
+                            resDict[props['leg']].append((float(x), float(y)))
+                    # print resDict
+                    for key, value in resDict.iteritems():
+                        resDict[key] = sorted(value)
+                    print resDict
+                    print str(pidSelected) + "_" + "_".join(scenarios)
+                    import pickle
+                    with open(str(pidSelected) + "_" + "_".join(scenarios) + ".pkl", "wb") as outfile:
+                        pickle.dump(resDict, outfile)
 
     # time stamp - end
     elapsed = timeit.default_timer() - start_time
