@@ -12,6 +12,7 @@ import hgcalHistHelpers
 import numpy as np
 import timeit
 import megaClustering
+import pfClusterLayerDropping
 
 # filtering parameters
 dependSensor = True
@@ -44,7 +45,7 @@ class ResolutionScaleObject:
         self.refTLV = ROOT.TLorentzVector()
         self.refTLV.SetPtEtaPhiE(ref.pt, ref.eta, ref.phi, ref.energy)
         self.objTLV = ROOT.TLorentzVector()
-        if (objName == "pfcluster"):
+        if (objName == "pfcluster") or (objName == "pfcluster_manual"):
             self.objTLV.SetPtEtaPhiE(obj.pt*obj.correctedEnergy/obj.energy, obj.eta, obj.phi, obj.correctedEnergy)
         else:
             self.objTLV.SetPtEtaPhiE(obj.pt, obj.eta, obj.phi, obj.energy)
@@ -112,8 +113,9 @@ def eventLoop(ntuple, refName, objName, axisCollectionName, gun_type, pidOfInter
         if (objName == "megacluster"):
             genParticles, axisCollection, layerClusters, recHits = megaClustering.getCollections(event, axisCollectionName)
             collectionOfInterest = megaClustering.getMegaClusters(genParticles, axisCollection, axisCollectionName, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest, skipLayers=skipLayers)
-            # genParticles, multiClusters, layerClusters, recHits = megaClustering.getCollections(event)
-            # collectionOfInterest = megaClustering.getMegaClusters(genParticles, multiClusters, layerClusters, recHits, gun_type, GEN_engpt, pidOfInterest)
+        elif (objName == "pfcluster_manual"):
+            genParticles, pfClusters, recHits = pfClusterLayerDropping.getCollections(event)
+            collectionOfInterest = pfClusterLayerDropping.getPFClusters(genParticles, pfClusters, recHits, gun_type, GEN_engpt, pidOfInterest, skipLayers=skipLayers)
         elif (objName == "pfcluster_uncalib"):
             # use normal pfcluster collection, but in the following energy instead of correctedEnergy will be used
             collectionOfInterest = event.getDataFrame(prefix="pfcluster")
@@ -163,7 +165,7 @@ def getReferencePairs(referenceCollection, collectionOfInterest, objName):
         refEnergy = 0
         try:
             refEnergy = referenceCollection.iloc[idx1].energy
-            if (objName == "pfcluster"):
+            if (objName == "pfcluster" or objName == "pfcluster_manual"):
                 objEnergy = collectionOfInterest.iloc[idx2].correctedEnergy
             else:
                 objEnergy = collectionOfInterest.iloc[idx2].energy

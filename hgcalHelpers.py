@@ -55,7 +55,7 @@ def getRecHitsSimAssoc(rechits_raw, simcluster, dependSensor=True, ecut=3, verbo
 
 def getRecHitsAssociatedToSimCluster(simCluster, recHits):
     # get sim-cluster associations
-    recHitIndices = np.nonzero(np.in1d(recHits["detid"], simCluster["hits"]))
+    recHitIndices = np.nonzero(np.in1d(recHits["detid"], *simCluster["hits"]))
     # print recHitIndices
     # for index in recHitIndices:
     #     for i in index:
