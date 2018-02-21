@@ -140,13 +140,17 @@ def setupSummaryGraphs(pidSelected, resScale_values, scenarios, type='effSigma',
                 graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "PF cluster, pileup 200, "+sGraphTag, "color": 10000, "MarkerStyle": 21+indx, "LineStyle": 4+indx}
             elif (scenario == "PF_noPU"):  # for scenario PF_noPU
                 graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "PF cluster, no pileup, "+sGraphTag, "color": 10003, "MarkerStyle": 21+indx, "LineStyle": 4+indx}
+            elif (scenario == "PF_manual_noPU"):  # for scenario PF_manual_noPU
+                graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "PF cluster, no pileup, "+sGraphTag, "color": 10003, "MarkerStyle": 21+indx, "LineStyle": 4+indx}
+            elif (scenario == "PF_manual_PU200"):  # for scenario PF_manual_PU200
+                graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "PF cluster, pileup 200, "+sGraphTag, "color": 10000, "MarkerStyle": 21+indx, "LineStyle": 4+indx}
             elif (scenario == "Mega_PU200"):  # for scenario PF_PU200
                 graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "Megacluster, pileup 200, "+sGraphTag, "color": 10004, "MarkerStyle": 25+indx, "LineStyle": 1+indx}
-            elif (scenario == "Mega_noPU"):  # for scenario PF_noPU
+            elif (scenario == "Mega_noPU"):  # for scenario Mega_noPU
                 graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "Megacluster, no pileup, "+sGraphTag, "color": ROOT.kBlack, "MarkerStyle": 20+indx, "LineStyle": 1+indx}
-            elif (scenario == "Mega_track_PU200"):  # for scenario PF_PU200
+            elif (scenario == "Mega_track_PU200"):  # for scenario Mega_track_PU200
                 graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "Megacluster (track), pileup 200, "+sGraphTag, "color": 10004, "MarkerStyle": 25+indx, "LineStyle": 1+indx}
-            elif (scenario == "Mega_track_noPU"):  # for scenario PF_noPU
+            elif (scenario == "Mega_track_noPU"):  # for scenario Mega_track_noPU
                 graphsAndProps[ROOT.TGraph(len(xEng), xEng, yRes)] = {"leg": "Megacluster (track), no pileup, "+sGraphTag, "color": ROOT.kBlack, "MarkerStyle": 20+indx, "LineStyle": 1+indx}
             else:  # here implement graphs for additional scenarios...
                 print "Warning: Required scenario (" + scenario + ") not implemented. No graph added."
@@ -175,6 +179,26 @@ def setupResScaleScenario(inputdir, gun_type, pidSelected, GEN_engpt, refName, s
         histsFilesAndInfoMap = {"obj_Pt": {'file': filePF, 'hist_prefix': "obj_Pt", 'leg': "PF cluster (calibrated)", 'color': 10000},
                                 "ref_Pt": {'file': filePF, 'hist_prefix': "ref_Pt", 'leg': "GEN particle (" + gun_type + "={0:.1f} GeV".format(GEN_engpt) + ")", 'color': 10004},
                                 "cmp_Pt": {'file': filePFuncalib, 'hist_prefix': "obj_Pt", 'leg': "PF (non-calibrated) cluster", 'color': 10003}}
+        resolutionFileAndInfoMap = {'file': filePF, 'hist_prefix': "obj_dEoverE", 'leg': "PF (calibrated) cluster", 'color': 10000,
+                                    'renormNoPU': {'file': fileRenormNoPU,  'hist_prefix': "obj_Pt"}}
+    elif (scenario == "PF_manual_noPU"):
+        # list of files and corresponding info
+        filePF = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "pfcluster_manual", "noPU"), "read")  # info based on PF energy
+        fileRenormNoPU = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "pfcluster_manual", "noPU"), "read")  # info based on megacluster energy, noPU
+        # map of histograms and files
+        histsFilesAndInfoMap = {"obj_Pt": {'file': filePF, 'hist_prefix': "obj_Pt", 'leg': "PF cluster (calibrated)", 'color': 10000},
+                                "ref_Pt": {'file': filePF, 'hist_prefix': "ref_Pt", 'leg': "GEN particle (" + gun_type + "={0:.1f} GeV".format(GEN_engpt) + ")", 'color': 10004},
+                                }
+        resolutionFileAndInfoMap = {'file': filePF, 'hist_prefix': "obj_dEoverE", 'leg': "PF (calibrated) cluster", 'color': 10000,
+                                    'renormNoPU': {'file': fileRenormNoPU,  'hist_prefix': "obj_Pt"}}
+    elif (scenario == "PF_manual_PU200"):
+        # list of files and corresponding info
+        filePF = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "pfcluster_manual", "PU200"), "read")  # info based on PF energy
+        fileRenormNoPU = ROOT.TFile.Open(inputdir + "/{}_{}_{}GeV_{}_{}_{}.root".format(gun_type, pidSelected, int(GEN_engpt), refName, "pfcluster_manual", "noPU"), "read")  # info based on megacluster energy, noPU
+        # map of histograms and files
+        histsFilesAndInfoMap = {"obj_Pt": {'file': filePF, 'hist_prefix': "obj_Pt", 'leg': "PF cluster (calibrated)", 'color': 10000},
+                                "ref_Pt": {'file': filePF, 'hist_prefix': "ref_Pt", 'leg': "GEN particle (" + gun_type + "={0:.1f} GeV".format(GEN_engpt) + ")", 'color': 10004},
+                                }
         resolutionFileAndInfoMap = {'file': filePF, 'hist_prefix': "obj_dEoverE", 'leg': "PF (calibrated) cluster", 'color': 10000,
                                     'renormNoPU': {'file': fileRenormNoPU,  'hist_prefix': "obj_Pt"}}
     elif (scenario == "PC_noPU"):  # scenario: noPU, resolutoin from PC

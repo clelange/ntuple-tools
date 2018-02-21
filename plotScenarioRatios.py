@@ -18,6 +18,12 @@ def getData(path, pkl_file):
 
 
 def main():
+    # pkl_file = "211_PF_manual_noPU_PF_manual_PU200.pkl"
+    # nominal = "manual"
+    # scenarios = {}
+    # scenarios["manual_18_9_9"] = "18-9-9"
+    # scenarios["manual_24_11_11"] = "24-11-11"
+    # scenarios["manual_skipFH"] = "32-6-12"
     pkl_file = "211_Mega_noPU_Mega_PU200_Mega_noPU_PU200.pkl"
     nominal = "nominal"
     scenarios = {}
@@ -85,7 +91,7 @@ def main():
         leg.SetTextFont(42)
         firstGraph = True
         for puScen, values in thisDict.iteritems():
-            leg.AddEntry(ratioGraphs[puScen], puScen)
+            leg.AddEntry(ratioGraphs[puScen], puScen, "pl")
             if firstGraph:
                 ratioGraphs[puScen].Draw("apl")
                 firstGraph = False
