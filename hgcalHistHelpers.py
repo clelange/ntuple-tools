@@ -115,7 +115,7 @@ def histsPrintSaveSameCanvas(histsAndProps, outDir, tag="hists1D_", latexComment
             hist.SetLineWidth(2)
             leg.AddEntry(hist, histsAndProps[hist]["leg"], "L")
             hist.GetXaxis().SetTitleOffset(hist.GetXaxis().GetTitleOffset() * 1.2)
-            hist.GetXaxis().SetTitle("E_{meas}/E_{true}")
+            hist.GetXaxis().SetTitle(histsAndProps[hist]["xTitle"])
             hist.GetYaxis().SetTitleOffset(hist.GetYaxis().GetTitleOffset() * 3.0)
             if (first):
                 hist.GetYaxis().SetRangeUser(0, max(y_maxs) * 1.4)
