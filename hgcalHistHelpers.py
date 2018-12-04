@@ -78,7 +78,7 @@ def histsPrintSaveSameCanvas(histsAndProps, outDir, tag="hists1D_", latexComment
     ltx = ROOT.TLatex()
     ltx.SetNDC(ROOT.kTRUE)
     ltx.SetTextFont(42)
-    ltx.SetTextSize(0.03)
+    ltx.SetTextSize(0.06)
     # set image extensions
     imgTypes = ["pdf", "png", "root"]
     if (verbosityLevel >= 3):
@@ -119,7 +119,7 @@ def histsPrintSaveSameCanvas(histsAndProps, outDir, tag="hists1D_", latexComment
             hist.GetYaxis().SetTitleOffset(hist.GetYaxis().GetTitleOffset() * 3.0)
             if (first):
                 hist.GetYaxis().SetRangeUser(0, max(y_maxs) * 1.4)
-                hist.GetXaxis().SetRangeUser(0, max(x_maxs) * 1.0)
+                hist.GetXaxis().SetRangeUser(0, max(x_maxs) * 1.1)
                 hist.Draw("hist0 goff")
                 first = False
             else:
@@ -137,6 +137,7 @@ def histsPrintSaveSameCanvas(histsAndProps, outDir, tag="hists1D_", latexComment
     for k in range(len(latexComment)):
         ltx.DrawLatex(0.17, 0.86 - len(histsAndProps)*0.07 - k*0.07, latexComment[k])
     # print latex header
+    ltx.SetTextSize(0.03)
     ltx.SetTextColor(ROOT.kBlack)
     ltx.DrawLatex(0.150, 0.935, "CMS Phase-2 Simulation, #sqrt{s} = 14 TeV")
     for imgType in imgTypes:
@@ -207,8 +208,9 @@ def drawGraphs(graphsAndProps, grOptions, outDir, latexComment=[], tag="graphTes
         gr.SetFillStyle(0)
         leg.AddEntry(gr, graphsAndProps[gr]["leg"])
         if (first):
-            gr.SetMaximum(max(y_maxs) * 1.5)
-            gr.SetMinimum(4.)
+            y_max = max(max(y_maxs) * 2.2, 3)
+            gr.SetMaximum(y_max)
+            gr.SetMinimum(0)
             gr.SetTitle("")
             gr.Draw("AP goff")
             first = False
